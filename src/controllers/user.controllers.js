@@ -102,7 +102,7 @@ import mongoose from "mongoose";
 
    const {email, username, password} = req.body
 
-   console.log(email);
+   //console.log(email);
 
    if(!username && !email){
       throw new ApiError(400, "username or email is required")
@@ -151,8 +151,8 @@ import mongoose from "mongoose";
  const logoutUser = asyncHandler(async(req, res) => {
   await User.findByIdAndUpdate(
       req.user._id, {
-         $set: {
-            refreshToken: undefined
+         $unset: {
+            refreshToken: 1
          }
       },
       {
@@ -374,7 +374,7 @@ import mongoose from "mongoose";
                $size: "$subscribedTo"
             },
             isSubscribed: {
-               $coud: {
+               $cond: {
                   if: {$in: [req.user?._id, "$subscribers.subscriber"]},
                   then: true,
                   else: false
@@ -398,9 +398,13 @@ import mongoose from "mongoose";
       }
    ])
 
-   if(!channel?.lenth) {
-      throw new ApiError(404, "channel does not exists")
-   }
+  // if(!channel?.lenth) {
+  //    throw new ApiError(404, "channel does not exists")
+  // }
+
+  if (!channel || channel.length === 0) {
+   throw new ApiError(404, "User channel does not exist");
+}
 
    return res
    .status(200)
